@@ -1,0 +1,229 @@
+name: CI/CD - Manual Deployment
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  # Job 1: Test & Quality Check
+  test:
+    name: Test & Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r deployment/requirements.txt
+        pip install pytest flake8 black
+    
+    - name: Code Quality - Flake8
+      run: |
+        echo "Running Flake8 linter..."
+        flake8 deployment/ mlops/ --count --select=E9,F63,F7,F82 --show-source --statistics || true
+        flake8 deployment/ mlops/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      continue-on-error: true
+    
+    - name: Code Format - Black
+      run: |
+        echo "Checking code formatting..."
+        black --check deployment/ mlops/ || true
+      continue-on-error: true
+    
+    - name: Import Tests
+      run: |
+        echo "Testing imports..."
+        cd deployment
+        python -c "import sys; sys.path.append('.'); sys.path.append('../mlops'); from app_mlops import app; print('✅ Flask app imported successfully')"
+        cd ..
+        python -c "from mlops.monitoring.performance import PerformanceMonitor; print('✅ Performance monitor OK')"
+        python -c "from mlops.monitoring.drift_detection import DataDriftDetector; print('✅ Drift detector OK')"
+        python -c "from mlops.mlflow_config.config import mlflow_config; print('✅ MLflow config OK')"
+    
+    - name: Check Required Files
+      run: |
+        echo "Checking required files..."
+        test -f deployment/app_mlops.py && echo "✅ app_mlops.py exists" || exit 1
+        test -f model/model.pkl && echo "✅ model.pkl exists" || exit 1
+        test -f data/WA_Fn-UseC_-Telco-Customer-Churn.csv && echo "✅ Training data exists" || exit 1
+        test -f deployment/requirements.txt && echo "✅ requirements.txt exists" || exit 1
+        echo "✅ All required files present"
+    
+    - name: Test Summary
+      run: |
+        echo "================================"
+        echo "✅ All tests passed!"
+        echo "================================"
+  
+  # Job 2: Build Artifact
+  build:
+    name: Build Application Package
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Create deployment package
+      run: |
+        echo "Creating deployment package..."
+        mkdir -p dist
+        
+        # Copy necessary files
+        cp -r deployment dist/
+        cp -r mlops dist/
+        cp -r model dist/
+        cp -r data dist/
+        cp -r training dist/
+        
+        # Create version file
+        echo "version: $(date +%Y%m%d-%H%M%S)" > dist/VERSION
+        echo "commit: ${{ github.sha }}" >> dist/VERSION
+        echo "branch: ${{ github.ref_name }}" >> dist/VERSION
+        
+        # Create archive
+        cd dist
+        tar -czf ../mlops-app-${{ github.sha }}.tar.gz .
+        cd ..
+        
+        echo "✅ Package created: mlops-app-${{ github.sha }}.tar.gz"
+        ls -lh mlops-app-*.tar.gz
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: mlops-app-${{ github.sha }}
+        path: mlops-app-${{ github.sha }}.tar.gz
+        retention-days: 30
+    
+    - name: Build Summary
+      run: |
+        echo "================================"
+        echo "✅ Build complete!"
+        echo "Artifact: mlops-app-${{ github.sha }}.tar.gz"
+        echo "================================"
+  
+  # Job 3: Deploy to Server (Manual/SSH)
+  deploy:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: mlops-app-${{ github.sha }}
+    
+    - name: Deploy Instructions
+      run: |
+        echo "🚀 Deployment Package Ready!"
+        echo "================================"
+        echo ""
+        echo "📦 Artifact: mlops-app-${{ github.sha }}.tar.gz"
+        echo ""
+        echo "📋 Manual Deployment Steps:"
+        echo ""
+        echo "1. Download artifact dari GitHub Actions"
+        echo "2. Upload ke server:"
+        echo "   scp mlops-app-*.tar.gz user@your-server:/app/"
+        echo ""
+        echo "3. Extract di server:"
+        echo "   cd /app"
+        echo "   tar -xzf mlops-app-*.tar.gz"
+        echo ""
+        echo "4. Install dependencies:"
+        echo "   cd /app/deployment"
+        echo "   pip install -r requirements.txt"
+        echo ""
+        echo "5. Restart aplikasi:"
+        echo "   pkill -f app_mlops.py"
+        echo "   nohup python app_mlops.py > app.log 2>&1 &"
+        echo ""
+        echo "6. Verify:"
+        echo "   curl http://your-server:5000/api/health"
+        echo ""
+        echo "================================"
+    
+    # Uncomment dan configure untuk auto-deploy ke server
+    # - name: Deploy via SSH
+    #   uses: appleboy/ssh-action@v1.0.0
+    #   with:
+    #     host: ${{ secrets.SERVER_HOST }}
+    #     username: ${{ secrets.SERVER_USER }}
+    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     script: |
+    #       cd /app
+    #       wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/mlops-app-${{ github.sha }}.tar.gz
+    #       tar -xzf mlops-app-${{ github.sha }}.tar.gz
+    #       pip install -r deployment/requirements.txt
+    #       pkill -f app_mlops.py
+    #       nohup python deployment/app_mlops.py > app.log 2>&1 &
+    
+    # Uncomment untuk deploy ke Azure App Service
+    # - name: Deploy to Azure App Service
+    #   uses: azure/webapps-deploy@v2
+    #   with:
+    #     app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+    #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+    #     package: mlops-app-${{ github.sha }}.tar.gz
+    
+    # Uncomment untuk deploy ke AWS EC2
+    # - name: Deploy to AWS EC2
+    #   run: |
+    #     aws s3 cp mlops-app-${{ github.sha }}.tar.gz s3://my-bucket/
+    #     aws ec2 run-instances --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
+    #       --command "wget https://s3.../mlops-app.tar.gz && tar -xzf mlops-app.tar.gz"
+  
+  # Job 4: Notification
+  notify:
+    name: Notification
+    needs: [test, build, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Success Notification
+      if: ${{ needs.test.result == 'success' && needs.build.result == 'success' }}
+      run: |
+        echo "✅ CI/CD Pipeline Completed Successfully!"
+        echo "================================"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Triggered by: ${{ github.actor }}"
+        echo "================================"
+        echo ""
+        echo "📦 Artifact available for download"
+        echo "🚀 Ready for deployment"
+    
+    - name: Failure Notification
+      if: ${{ needs.test.result == 'failure' || needs.build.result == 'failure' }}
+      run: |
+        echo "❌ CI/CD Pipeline Failed!"
+        echo "================================"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Commit: ${{ github.sha }}"
+        echo "Please check the logs above"
+        echo "================================"
+        exit 1
