@@ -53,26 +53,24 @@ jobs:
       run: |
         echo "Testing imports..."
         cd deployment
-        python -c "import sys; sys.path.append('.'); sys.path.append('../mlops'); from app_mlops import app; print('✅ Flask app imported successfully')"
+        python -c "import sys; sys.path.append('.'); sys.path.append('../mlops'); from app_mlops import app; print('Flask app imported successfully')"
         cd ..
-        python -c "from mlops.monitoring.performance import PerformanceMonitor; print('✅ Performance monitor OK')"
-        python -c "from mlops.monitoring.drift_detection import DataDriftDetector; print('✅ Drift detector OK')"
-        python -c "from mlops.mlflow_config.config import mlflow_config; print('✅ MLflow config OK')"
+        python -c "from mlops.monitoring.performance import PerformanceMonitor; print('Performance monitor OK')"
+        python -c "from mlops.monitoring.drift_detection import DataDriftDetector; print('Drift detector OK')"
+        python -c "from mlops.mlflow_config.config import mlflow_config; print('MLflow config OK')"
     
     - name: Check Required Files
       run: |
         echo "Checking required files..."
-        test -f deployment/app_mlops.py && echo "✅ app_mlops.py exists" || exit 1
-        test -f model/model.pkl && echo "✅ model.pkl exists" || exit 1
-        test -f data/WA_Fn-UseC_-Telco-Customer-Churn.csv && echo "✅ Training data exists" || exit 1
-        test -f deployment/requirements.txt && echo "✅ requirements.txt exists" || exit 1
-        echo "✅ All required files present"
+        test -f deployment/app_mlops.py && echo "app_mlops.py exists" || exit 1
+        test -f model/model.pkl && echo "model.pkl exists" || exit 1
+        test -f data/WA_Fn-UseC_-Telco-Customer-Churn.csv && echo "Training data exists" || exit 1
+        test -f deployment/requirements.txt && echo "requirements.txt exists" || exit 1
+        echo "All required files present"
     
     - name: Test Summary
       run: |
-        echo "================================"
         echo "✅ All tests passed!"
-        echo "================================"
   
   # Job 2: Build Artifact
   build:
@@ -106,7 +104,7 @@ jobs:
         tar -czf ../mlops-app-${{ github.sha }}.tar.gz .
         cd ..
         
-        echo "✅ Package created: mlops-app-${{ github.sha }}.tar.gz"
+        echo "Package created: mlops-app-${{ github.sha }}.tar.gz"
         ls -lh mlops-app-*.tar.gz
     
     - name: Upload artifact
@@ -118,10 +116,8 @@ jobs:
     
     - name: Build Summary
       run: |
-        echo "================================"
-        echo "✅ Build complete!"
+        echo "Build complete!"
         echo "Artifact: mlops-app-${{ github.sha }}.tar.gz"
-        echo "================================"
   
   # Job 3: Deploy to Server (Manual/SSH)
   deploy:
@@ -139,7 +135,6 @@ jobs:
     - name: Deploy Instructions
       run: |
         echo "🚀 Deployment Package Ready!"
-        echo "================================"
         echo ""
         echo "📦 Artifact: mlops-app-${{ github.sha }}.tar.gz"
         echo ""
@@ -164,37 +159,6 @@ jobs:
         echo "6. Verify:"
         echo "   curl http://your-server:5000/api/health"
         echo ""
-        echo "================================"
-    
-    # Uncomment dan configure untuk auto-deploy ke server
-    # - name: Deploy via SSH
-    #   uses: appleboy/ssh-action@v1.0.0
-    #   with:
-    #     host: ${{ secrets.SERVER_HOST }}
-    #     username: ${{ secrets.SERVER_USER }}
-    #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     script: |
-    #       cd /app
-    #       wget https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/mlops-app-${{ github.sha }}.tar.gz
-    #       tar -xzf mlops-app-${{ github.sha }}.tar.gz
-    #       pip install -r deployment/requirements.txt
-    #       pkill -f app_mlops.py
-    #       nohup python deployment/app_mlops.py > app.log 2>&1 &
-    
-    # Uncomment untuk deploy ke Azure App Service
-    # - name: Deploy to Azure App Service
-    #   uses: azure/webapps-deploy@v2
-    #   with:
-    #     app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
-    #     publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-    #     package: mlops-app-${{ github.sha }}.tar.gz
-    
-    # Uncomment untuk deploy ke AWS EC2
-    # - name: Deploy to AWS EC2
-    #   run: |
-    #     aws s3 cp mlops-app-${{ github.sha }}.tar.gz s3://my-bucket/
-    #     aws ec2 run-instances --instance-id ${{ secrets.EC2_INSTANCE_ID }} \
-    #       --command "wget https://s3.../mlops-app.tar.gz && tar -xzf mlops-app.tar.gz"
   
   # Job 4: Notification
   notify:
