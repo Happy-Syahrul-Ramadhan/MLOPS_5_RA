@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/550401321311682147/032c51abd1194595b65c67bc44475b2d/artifacts
+end_time: 1765813557731
+entry_point_name: ''
+experiment_id: '550401321311682147'
+lifecycle_stage: active
+run_id: 032c51abd1194595b65c67bc44475b2d
+run_name: zealous-dolphin-133
+run_uuid: 032c51abd1194595b65c67bc44475b2d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765813557342
+status: 3
+tags: []
+user_id: syahrul

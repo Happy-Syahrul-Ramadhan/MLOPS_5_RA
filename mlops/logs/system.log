@@ -1,0 +1,10 @@
+2025-12-15 22:37:13 - system - INFO - {"timestamp": "2025-12-15T22:37:13.267735", "event": "ModelLoaded", "message": "Model loaded from D:\\mlopssss\\deployment\\..\\model\\model.pkl", "metadata": {}}
+2025-12-15 22:37:13 - system - INFO - {"timestamp": "2025-12-15T22:37:13.323966", "event": "APIStarted", "message": "Flask API started with MLOps", "metadata": {}}
+2025-12-15 22:37:17 - system - INFO - {"timestamp": "2025-12-15T22:37:17.321956", "event": "ModelLoaded", "message": "Model loaded from D:\\mlopssss\\deployment\\..\\model\\model.pkl", "metadata": {}}
+2025-12-15 22:37:17 - system - INFO - {"timestamp": "2025-12-15T22:37:17.394446", "event": "APIStarted", "message": "Flask API started with MLOps", "metadata": {}}
+2025-12-15 22:38:08 - system - INFO - {"timestamp": "2025-12-15T22:38:08.879992", "event": "ModelLoaded", "message": "Model loaded from D:\\mlopssss\\deployment\\..\\model\\model.pkl", "metadata": {}}
+2025-12-15 22:38:08 - system - INFO - {"timestamp": "2025-12-15T22:38:08.995890", "event": "APIStarted", "message": "Flask API started with MLOps", "metadata": {}}
+2025-12-15 22:38:25 - system - INFO - {"timestamp": "2025-12-15T22:38:25.249807", "event": "ModelLoaded", "message": "Model loaded from D:\\mlopssss\\deployment\\..\\model\\model.pkl", "metadata": {}}
+2025-12-15 22:38:25 - system - INFO - {"timestamp": "2025-12-15T22:38:25.312689", "event": "APIStarted", "message": "Flask API started with MLOps", "metadata": {}}
+2025-12-15 22:41:09 - system - INFO - {"timestamp": "2025-12-15T22:41:09.375569", "event": "ModelLoaded", "message": "Model loaded from D:\\mlopssss\\deployment\\..\\model\\model.pkl", "metadata": {}}
+2025-12-15 22:41:09 - system - INFO - {"timestamp": "2025-12-15T22:41:09.377966", "event": "APIStarted", "message": "Flask API started with MLOps", "metadata": {}}

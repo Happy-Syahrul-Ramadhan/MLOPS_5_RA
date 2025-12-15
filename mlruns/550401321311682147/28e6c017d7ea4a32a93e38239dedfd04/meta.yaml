@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/550401321311682147/28e6c017d7ea4a32a93e38239dedfd04/artifacts
+end_time: 1765813365849
+entry_point_name: ''
+experiment_id: '550401321311682147'
+lifecycle_stage: active
+run_id: 28e6c017d7ea4a32a93e38239dedfd04
+run_name: rebellious-gnat-569
+run_uuid: 28e6c017d7ea4a32a93e38239dedfd04
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765813365579
+status: 3
+tags: []
+user_id: syahrul
