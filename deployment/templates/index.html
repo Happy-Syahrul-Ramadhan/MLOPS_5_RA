@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Customer Churn</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-predict:hover {
+            opacity: 0.9;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.churn {
+            background: #f5576c;
+            color: white;
+        }
+
+        .result.no-churn {
+            background: #4facfe;
+            color: white;
+        }
+
+        .result h3 {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .result-detail {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔮 Prediksi Customer Churn</h1>
+            <p>Masukkan data lengkap customer untuk prediksi churn</p>
+        </div>
+
+        <div class="content">
+            <form id="predictionForm">
+                <!-- Informasi Demografis -->
+                <div class="section-title">📋 Informasi Demografis</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Gender:</label>
+                        <select id="gender" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senior Citizen:</label>
+                        <select id="seniorCitizen" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Partner:</label>
+                        <select id="partner" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dependents:</label>
+                        <select id="dependents" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Layanan Telepon -->
+                <div class="section-title">📞 Layanan Telepon</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Phone Service:</label>
+                        <select id="phoneService" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Multiple Lines:</label>
+                        <select id="multipleLines" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No phone service">No phone service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Layanan Internet -->
+                <div class="section-title">🌐 Layanan Internet</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Internet Service:</label>
+                        <select id="internetService" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="DSL">DSL</option>
+                            <option value="Fiber optic">Fiber optic</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Online Security:</label>
+                        <select id="onlineSecurity" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Online Backup:</label>
+                        <select id="onlineBackup" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Device Protection:</label>
+                        <select id="deviceProtection" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tech Support:</label>
+                        <select id="techSupport" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Streaming TV:</label>
+                        <select id="streamingTV" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Streaming Movies:</label>
+                        <select id="streamingMovies" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                            <option value="No internet service">No internet service</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Kontrak & Pembayaran -->
+                <div class="section-title">💳 Kontrak & Pembayaran</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Contract:</label>
+                        <select id="contract" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Month-to-month">Month-to-month</option>
+                            <option value="One year">One year</option>
+                            <option value="Two year">Two year</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Paperless Billing:</label>
+                        <select id="paperlessBilling" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Payment Method:</label>
+                        <select id="paymentMethod" required>
+                            <option value="">-- Pilih --</option>
+                            <option value="Electronic check">Electronic check</option>
+                            <option value="Mailed check">Mailed check</option>
+                            <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                            <option value="Credit card (automatic)">Credit card (automatic)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Informasi Finansial -->
+                <div class="section-title">💰 Informasi Finansial & Tenure</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tenure (bulan):</label>
+                        <input type="number" id="tenure" min="0" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Monthly Charges ($):</label>
+                        <input type="number" step="0.01" id="monthlyCharges" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Total Charges ($):</label>
+                        <input type="number" step="0.01" id="totalCharges" min="0" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-predict">🔮 Prediksi Churn</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <p>⏳ Memproses prediksi...</p>
+            </div>
+
+            <div class="result" id="result">
+                <h3 id="resultText"></h3>
+                <div class="result-detail" id="resultDetail"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+
+            // Get form data
+            const data = {
+                gender: document.getElementById('gender').value,
+                SeniorCitizen: parseInt(document.getElementById('seniorCitizen').value),
+                Partner: document.getElementById('partner').value,
+                Dependents: document.getElementById('dependents').value,
+                tenure: parseInt(document.getElementById('tenure').value),
+                PhoneService: document.getElementById('phoneService').value,
+                MultipleLines: document.getElementById('multipleLines').value,
+                InternetService: document.getElementById('internetService').value,
+                OnlineSecurity: document.getElementById('onlineSecurity').value,
+                OnlineBackup: document.getElementById('onlineBackup').value,
+                DeviceProtection: document.getElementById('deviceProtection').value,
+                TechSupport: document.getElementById('techSupport').value,
+                StreamingTV: document.getElementById('streamingTV').value,
+                StreamingMovies: document.getElementById('streamingMovies').value,
+                Contract: document.getElementById('contract').value,
+                PaperlessBilling: document.getElementById('paperlessBilling').value,
+                PaymentMethod: document.getElementById('paymentMethod').value,
+                MonthlyCharges: parseFloat(document.getElementById('monthlyCharges').value),
+                TotalCharges: parseFloat(document.getElementById('totalCharges').value)
+            };
+
+            try {
+                // Send request
+                const response = await fetch('/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
+
+                // Show result
+                const resultDiv = document.getElementById('result');
+                const resultText = document.getElementById('resultText');
+                const resultDetail = document.getElementById('resultDetail');
+
+                if (result.prediction_label) {
+                    resultText.textContent = '🎯 Hasil: ' + result.prediction_label;
+                    
+                    let detailHTML = '';
+                    if (result.probability) {
+                        detailHTML += `<strong>Probabilitas:</strong><br>`;
+                        detailHTML += `• No Churn: ${(result.probability.no_churn * 100).toFixed(1)}%<br>`;
+                        detailHTML += `• Churn: ${(result.probability.churn * 100).toFixed(1)}%<br>`;
+                    }
+                    
+                    resultDetail.innerHTML = detailHTML;
+
+                    resultDiv.className = 'result show';
+                    if (result.prediction === 1) {
+                        resultDiv.classList.add('churn');
+                    } else {
+                        resultDiv.classList.add('no-churn');
+                    }
+                } else {
+                    resultText.textContent = '❌ Error';
+                    resultDetail.textContent = result.error || 'Terjadi kesalahan';
+                    resultDiv.className = 'result show';
+                }
+            } catch (error) {
+                document.getElementById('loading').classList.remove('show');
+                const resultDiv = document.getElementById('result');
+                document.getElementById('resultText').textContent = '❌ Error';
+                document.getElementById('resultDetail').textContent = 'Gagal menghubungi server: ' + error.message;
+                resultDiv.className = 'result show';
+            }
+        });
+    </script>
+</body>
+</html>

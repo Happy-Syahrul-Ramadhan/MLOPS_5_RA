@@ -1,0 +1,15 @@
+artifact_uri: mlflow-artifacts:/550401321311682147/711093fb9dab4fd39bc76ff612e86dac/artifacts
+end_time: 1765811174963
+entry_point_name: ''
+experiment_id: '550401321311682147'
+lifecycle_stage: active
+run_id: 711093fb9dab4fd39bc76ff612e86dac
+run_name: gifted-tern-737
+run_uuid: 711093fb9dab4fd39bc76ff612e86dac
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1765811174623
+status: 3
+tags: []
+user_id: syahrul

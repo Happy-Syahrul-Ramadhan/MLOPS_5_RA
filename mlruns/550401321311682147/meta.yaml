@@ -1,0 +1,6 @@
+artifact_location: mlflow-artifacts:/550401321311682147
+creation_time: 1765810094958
+experiment_id: '550401321311682147'
+last_update_time: 1765810094958
+lifecycle_stage: active
+name: churn-prediction-production
