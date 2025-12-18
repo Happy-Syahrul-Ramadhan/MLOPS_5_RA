@@ -326,6 +326,8 @@ Project ini menggunakan lisensi MIT - lihat file LICENSE untuk detail.
 
 - **Happy Syahrul Ramadhan** - 122450
 - **Nurul Alfajar Gumel**    - 122450127
+- **Sahid Maulana** -122450109
+- **Vita Anggraini** -122450046
 
 ## 🙏 Acknowledgments
 
