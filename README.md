@@ -324,7 +324,7 @@ Project ini menggunakan lisensi MIT - lihat file LICENSE untuk detail.
 
 ## 👥 Authors
 
-- **Happy Syahrul Ramadhan** - 122450
+- **Happy Syahrul Ramadhan** - 122450013
 - **Nurul Alfajar Gumel**    - 122450127
 - **Sahid Maulana** -122450109
 - **Vita Anggraini** -122450046
